@@ -37,10 +37,17 @@ app.post('/users', (req,res)=>{
 })
 
 // READ ALL USER
-
+app.get('/users', async(req, res)=>{
+    try {
+        const resp = await User.find({})
+        res.send(resp)
+    } catch (error) {
+        res.send(error)
+    }
+})
 
 // READ ONE USER BY ID
-app.get('/user/:id', async (req, res)=>{
+app.get('/users/:id', async (req, res)=>{
     
     try {
         const resp = await User.findById(req.params.id)
@@ -52,9 +59,33 @@ app.get('/user/:id', async (req, res)=>{
 })
 
 // DELETE ONE USER BY ID
+app.delete('/users/:id', async(req, res)=>{
+    try {
+        const resp = await User.findOneAndDelete(req.params.id)
+        res.send(resp)
+    } catch (error) {
+        res.send(error)
+    }
+})
+
 
 // UPDATE BY ID
-
+app.put('/users/:id', async(req, res)=>{
+    try {
+        const resp = await User.findByIdAndUpdate(req.params.id,{
+            $set:{
+                name: req.body.name,
+                age: req.body.age
+            }
+        },
+        {
+            new: true
+        } )
+        res.send(resp)
+    } catch (error) {
+        res.send(error)
+    }
+})
 
 
 
