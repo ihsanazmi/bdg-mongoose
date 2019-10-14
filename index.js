@@ -31,10 +31,29 @@ app.post('/users', (req,res)=>{
     const user = new User(req.body)
 
     user.save()
-        .then(()=>{res.send('Data berhasil disimpan')})
-        .catch(()=>{{res.send(err)}})
+        .then((resp)=>{res.send(resp)})
+        .catch((err)=>{{res.send(err)}})
 
 })
+
+// READ ALL USER
+
+
+// READ ONE USER BY ID
+app.get('/user/:id', async (req, res)=>{
+    
+    try {
+        const resp = await User.findById(req.params.id)
+        res.send(resp)
+    } catch (err) { 
+        res.send(err)
+    }
+    
+})
+
+// DELETE ONE USER BY ID
+
+// UPDATE BY ID
 
 
 
