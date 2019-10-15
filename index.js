@@ -2,6 +2,7 @@ const express = require('express')
 const mongoose = require('mongoose')
 
 const User = require('./models/userModel')
+const Task = require('./models/taskModel')
 
 const app = express()
 const port = 2020
@@ -32,8 +33,7 @@ app.post('/users', (req,res)=>{
 
     user.save()
         .then((resp)=>{res.send(resp)})
-        .catch((err)=>{{res.send(err)}})
-
+        .catch((err)=>{{res.send(err.message)}})
 })
 
 // READ ALL USER
@@ -68,7 +68,6 @@ app.delete('/users/:id', async(req, res)=>{
     }
 })
 
-
 // UPDATE BY ID
 app.put('/users/:id', async(req, res)=>{
     try {
@@ -87,8 +86,40 @@ app.put('/users/:id', async(req, res)=>{
     }
 })
 
+// LOGIN USER by EMAIL
+app.post('/users/login', (req, res)=>{
+    User.login(req.body.email, req.body.password)
+        .then(resp=>{
+            res.send({
+                kondisi: "Berhasil",
+                pesan: resp
+            })
+        }).catch(err=>{
+            res.send({
+                kondisi: "Gagal",
+                pesan: err.message
+            })
+        })
+})
 
+// TASK ROUTER
 
+// CREATE TASK
+app.post('/task', async(req, res)=>{
+    
+    try {
+        let task = new Task(req.body)
+        let resp = await task.save()
+    
+        res.send(resp)
+        
+    } catch (error) {
+        res.send(error.message)
+    }
+
+})
+
+// UPDATE TASK
 
 
 

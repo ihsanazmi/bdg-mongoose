@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const validator = require('validator')
+const bcrypt = require('bcrypt')
 
 const userSchema =  new mongoose.Schema({
     username:{
@@ -35,7 +36,14 @@ const userSchema =  new mongoose.Schema({
         type: String,
         required:true,
         trim: true,
-        minlength: 7 // Minimal 7 karakter,
+        minlength: 7, // Minimal 7 karakter,
+        validate(val){
+            let result = val.includes('password')
+            if(result){
+                throw new Error('Password tidak boleh mengandung kata "password"')
+            }
+        }
+        
     },
     email:{
         type: String,
@@ -59,6 +67,36 @@ const userSchema =  new mongoose.Schema({
     }
 })
 
+// Membuat function yang akan dijalankan sebelum proses user.save()
+userSchema.pre('save', async function(next){
+    // Mengubah password yang diinput menjadi bentuk lain
+    let user = this
+    user.password = await bcrypt.hash(user.password, 8)
+    next()
+})
+
+// Membuat login function
+userSchema.statics.login = async(email, password)=>{
+    // Mencari user berdasarkan email
+    let user = await User.findOne({email})
+
+    // jika user tidak di temukan
+    if(!user){
+        throw new Error(`User dengan email ${email} tidak di temukan`)
+    }
+    // Bandingkan password dari input user dgn yg ada di database
+    // result akan menghasilkan true or false
+    let result = await bcrypt.compare(password, user.password)
+    if(!result){
+        throw new Error('Password belum benar')
+    }
+
+    return user
+}
+
 const User = mongoose.model('user', userSchema)
 
 module.exports = User
+
+// Latihan 
+// Password tidak boleh mengandung kata 'password'
