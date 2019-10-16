@@ -79,7 +79,7 @@ app.put('/users/:id', async(req, res)=>{
         },
         {
             new: true
-        } )
+        })
         res.send(resp)
     } catch (error) {
         res.send(error)
@@ -120,7 +120,31 @@ app.post('/task', async(req, res)=>{
 })
 
 // UPDATE TASK
+app.patch('/task/:taskid', async (req, res)=>{
+    try {
+        // Cari task berdasarkan id
+        let task = await Task.findById(req.params.taskid)
+        // ubah completed menjadi true
+        task.completed = true
+        // simpan task yang sudah di update
+        await task.save()
+        // kirim respon
+        res.send({updatedTask: task})
 
+    } catch (error) {
+        res.send(error.message)
+    }
+})
+
+// DELETE TASK
+app.delete('task/:taskid', async (req, res)=>{
+    try {
+        let task = await Task.findByIdAndDelete(req.params.taskid)
+        res.send({deletedTask: task})
+    } catch (error) {
+        res.send(error.message)
+    }
+})
 
 
 
