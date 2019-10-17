@@ -64,7 +64,16 @@ const userSchema =  new mongoose.Schema({
         type: Number,
         set: val => parseInt(val),
         default:0   //Jika user tidak memberikan informasi umur
-    }
+    },
+    avatar:{
+        type: Buffer
+    },
+    task: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Task'
+    }]
+}, {
+    timestamps: true
 })
 
 // Membuat function yang akan dijalankan sebelum proses user.save()

@@ -1,8 +1,7 @@
 const express = require('express')
 const mongoose = require('mongoose')
-
-const User = require('./models/userModel')
-const Task = require('./models/taskModel')
+const userRouter = require('./routers/userRouters')
+const taskRouter = require('./routers/taskRouters')
 
 const app = express()
 const port = 2020
@@ -25,142 +24,10 @@ mongoose.connect(
 
 // Agar API dapat memproses json
 app.use(express.json())
+app.use(userRouter)
+app.use(taskRouter)
 
-// CREATE ONE USER
-app.post('/users', (req,res)=>{
-
-    const user = new User(req.body)
-
-    user.save()
-        .then((resp)=>{res.send(resp)})
-        .catch((err)=>{{res.send(err.message)}})
-})
-
-// READ ALL USER
-app.get('/users', async(req, res)=>{
-    try {
-        const resp = await User.find({})
-        res.send(resp)
-    } catch (error) {
-        res.send(error)
-    }
-})
-
-// READ ONE USER BY ID
-app.get('/users/:id', async (req, res)=>{
-    
-    try {
-        const resp = await User.findById(req.params.id)
-        res.send(resp)
-    } catch (err) { 
-        res.send(err)
-    }
-    
-})
-
-// DELETE ONE USER BY ID
-app.delete('/users/:id', async(req, res)=>{
-    try {
-        const resp = await User.findOneAndDelete(req.params.id)
-        res.send(resp)
-    } catch (error) {
-        res.send(error)
-    }
-})
-
-// UPDATE BY ID
-app.put('/users/:id', async(req, res)=>{
-    try {
-        const resp = await User.findByIdAndUpdate(req.params.id,{
-            $set:{
-                name: req.body.name,
-                age: req.body.age
-            }
-        },
-        {
-            new: true
-        })
-        res.send(resp)
-    } catch (error) {
-        res.send(error)
-    }
-})
-
-// LOGIN USER by EMAIL
-app.post('/users/login', (req, res)=>{
-    User.login(req.body.email, req.body.password)
-        .then(resp=>{
-            res.send({
-                kondisi: "Berhasil",
-                pesan: resp
-            })
-        }).catch(err=>{
-            res.send({
-                kondisi: "Gagal",
-                pesan: err.message
-            })
-        })
-})
-
-// TASK ROUTER
-
-// CREATE TASK
-app.post('/task', async(req, res)=>{
-    
-    try {
-        let task = new Task(req.body)
-        let resp = await task.save()
-    
-        res.send(resp)
-        
-    } catch (error) {
-        res.send(error.message)
-    }
-
-})
-
-// UPDATE TASK
-app.patch('/task/:taskid', async (req, res)=>{
-    try {
-        // Cari task berdasarkan id
-        let task = await Task.findById(req.params.taskid)
-        // ubah completed menjadi true
-        task.completed = true
-        // simpan task yang sudah di update
-        await task.save()
-        // kirim respon
-        res.send({updatedTask: task})
-
-    } catch (error) {
-        res.send(error.message)
-    }
-})
-
-// DELETE TASK
-app.delete('task/:taskid', async (req, res)=>{
-    try {
-        let task = await Task.findByIdAndDelete(req.params.taskid)
-        res.send({deletedTask: task})
-    } catch (error) {
-        res.send(error.message)
-    }
-})
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// app.post()
 
 app.listen(port, ()=>{console.log(`Running at port ${port}`)})
 
