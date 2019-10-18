@@ -42,35 +42,42 @@ router.get('/task/:userid', async (req, res)=>{
 })
 
 // UPDATE DESCRIPTION OR COMPLETED   TASK
-router.patch('/task/:taskid', async (req, res)=>{
-
+router.patch('/task/:taskid', async (req, res) => {
     let updates = Object.keys(req.body)
-    let allowedUpdate = ['description', 'owner']
-
-    let result = updates.every(update => {return allowedUpdate.includes(update)})
+    let allowedUpdates = ['description', 'completed']
+    let result = updates.every(update => allowedUpdates.includes(update))
 
     if(!result){
-        return res.send({err: "Invalid Request"})
+       return res.send({err: "Invalid Request"})
     }
 
     try {
         let task = await Task.findById(req.params.taskid)
-        updates.forEach((val) => { task[val] = req.body[val] })
+        updates.forEach(update => { task[update] = req.body[update] })
 
         await task.save()
 
         res.send(task)
-
     } catch (error) {
-        res.send(error.message)
+        res.send(error)
     }
+
 })
 
 // DELETE TASK
-router.delete('task/:taskid', async (req, res)=>{
+router.delete('/task/delete/:taskid/', async (req, res)=>{
     try {
         let task = await Task.findByIdAndDelete(req.params.taskid)
-        res.send({deletedTask: task})
+        // task = {_id, owner, description, completed, owner}
+        let user = await User.findById(task.owner)
+        // Mencari posisi index dari task yang sudah di hapus
+        let index = user.task.indexOf(req.params.taskid)
+        // Hapus _id task berdasarkan index
+        user.task.splice(index,1)
+
+        await user.save()
+        
+        res.send(task)
     } catch (error) {
         res.send(error.message)
     }

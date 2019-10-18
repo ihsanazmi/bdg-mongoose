@@ -30,6 +30,10 @@ router.post('/user/avatar/:userid', upload.single('avatar') , async(req, res)=>{
     } catch (error) {
         res.send(error.message)
     }
+},(err, req, res, next)=>{
+    res.send({
+        err: err.message
+    })
 })
 
 // READ AVATAR
@@ -93,21 +97,9 @@ router.patch('/users/:userid', async (req, res)=>{
         let user = await User.findById(req.params.userid)
 
         updates.forEach((val) => { user[val] = req.body[val] })
-
         await user.save()
-
         res.send(user)
-
-        // Update user
-
-            // user.name = req.body.name
-            // user.email = req.body.email
-            // user.password = req.body.password
-            // user.age = req.body.age
-
-        // updates = [ 'name', 'email', 'password', 'age' ]
-        // user = {name, email, password, age}
-
+        
     } catch (error) {
         res.send(error.message)
     }
