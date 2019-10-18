@@ -4,8 +4,8 @@ const userRouter = require('./routers/userRouters')
 const taskRouter = require('./routers/taskRouters')
 
 const app = express()
-const port = 2020
-const URL = 'mongodb://127.0.0.1:27017/bdg-mongoose'
+const port = process.env.PORT || 2020
+const URL = 'mongodb+srv://ihsanazmi:kumis@bdg-mongoose-eavq2.gcp.mongodb.net/bdg-mongoose?retryWrites=true&w=majority'
 
 mongoose.connect(
     URL,
