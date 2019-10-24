@@ -81,7 +81,7 @@ router.get('/users/:id', async (req, res)=>{
         const user = await User.findById(req.params.id)
         res.send({
             user,
-            avatar: `http://localhost:2020/user/avatar/${req.params.id}`
+            avatar: `https://bdg-mongoose-kumis.herokuapp.com/user/avatar/${req.params.id}`
 
         })
     } catch (err) { 
