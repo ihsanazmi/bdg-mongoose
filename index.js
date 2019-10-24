@@ -16,7 +16,7 @@ const URL = 'mongodb+srv://ihsanazmi:kumis@bdg-mongoose-eavq2.gcp.mongodb.net/bd
 // });
 
 mongoose.connect(
-    URL_LOCAL,
+    URL,
     {
         // Menggunakan url parser yang baru
         useNewUrlParser: true,
