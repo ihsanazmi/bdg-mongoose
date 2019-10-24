@@ -49,13 +49,19 @@ router.get('/user/avatar/:userid', async (req, res)=>{
 })
 
 // CREATE ONE USER
-router.post('/users', (req,res)=>{
-
+router.post('/users', async (req,res)=>{
     const user = new User(req.body)
+    try {
+        await  user.save()
+        res.send(user)
+    } catch (e) {
+        // e.errors = {username, email}
+        // res.send(Object.keys(e.errors)[0])
+        res.send({
+            error: e.errors[Object.keys(e.errors)[0]].message
+        })
+    }
 
-    user.save()
-        .then((resp)=>{res.send(resp)})
-        .catch((err)=>{{res.send(err.message)}})
 })
 
 // READ ALL USER
@@ -72,8 +78,12 @@ router.get('/users', async(req, res)=>{
 router.get('/users/:id', async (req, res)=>{
     
     try {
-        const resp = await User.findById(req.params.id)
-        res.send(resp)
+        const user = await User.findById(req.params.id)
+        res.send({
+            user,
+            avatar: `http://localhost:2020/user/avatar/${req.params.id}`
+
+        })
     } catch (err) { 
         res.send(err)
     }
@@ -81,8 +91,17 @@ router.get('/users/:id', async (req, res)=>{
 })
 
 // UPDATE PROFILE
-router.patch('/users/:userid', async (req, res)=>{
+router.patch('/users/:userid', upload.single('avatar'), async (req, res)=>{
+    
+    if(!req.body.password){
+        delete req.body.password
+    }
+    
+    
     let updates = Object.keys(req.body)
+    if(!req.file){
+        updates.splice(updates.indexOf('avatar',1))
+    }
     let allowedUpdate = ['name', 'email', 'password', 'age']
 
     let result = updates.every(update => {return allowedUpdate.includes(update)})
@@ -97,6 +116,14 @@ router.patch('/users/:userid', async (req, res)=>{
         let user = await User.findById(req.params.userid)
 
         updates.forEach((val) => { user[val] = req.body[val] })
+        
+        
+        if(Object.keys(req).includes('file')){
+            let buffer = await sharp(req.file.buffer).resize({width:250}).png().toBuffer()
+            user.avatar = buffer
+        }
+        
+
         await user.save()
         res.send(user)
         
@@ -135,19 +162,17 @@ router.put('/users/:id', async(req, res)=>{
 })
 
 // LOGIN USER by EMAIL
-router.post('/users/login', (req, res)=>{
-    User.login(req.body.email, req.body.password)
-        .then(resp=>{
-            res.send({
-                kondisi: "Berhasil",
-                pesan: resp
-            })
-        }).catch(err=>{
-            res.send({
-                kondisi: "Gagal",
-                pesan: err.message
-            })
+router.post('/users/login', async (req, res)=>{
+
+    try {
+        let user = await User.login(req.body.email, req.body.password)
+        res.send(user)
+        
+    } catch (error) {
+        res.send({
+            error: error.message
         })
+    }
 })
 
 module.exports = router

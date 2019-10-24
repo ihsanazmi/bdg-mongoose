@@ -2,15 +2,18 @@ const express = require('express')
 const router = new express.Router()
 const Task = require('../models/taskModel')
 const User = require('../models/userModel')
+// const Cors = require('cors')
 
 // TASK ROUTER
 // CREATE TASK
+// router.options('/task/:userid')
+
 router.post('/task/:userid', async(req, res)=>{
     
     try {
         let user = await User.findById(req.params.userid)
         let task = new Task({
-            description: req.body.description,
+            ...req.body,
             owner: user._id
         })
         

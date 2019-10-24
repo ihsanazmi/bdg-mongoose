@@ -1,10 +1,13 @@
 const mongoose = require('mongoose')
 const validator = require('validator')
 const bcrypt = require('bcrypt')
+const uniqueValidator = require('mongoose-unique-validator')
 
 const userSchema =  new mongoose.Schema({
     username:{
         type: String,
+        unique: true,
+        required:true,
         set: (val)=>{ return val.replace(/ /g, '') }, // val = data dari user, menghapus semua spasi
         validate(val){
             // val = "maxx"
@@ -93,7 +96,9 @@ userSchema.methods.toJSON = function(){
 userSchema.pre('save', async function(next){
     // Mengubah password yang diinput menjadi bentuk lain
     let user = this
-    user.password = await bcrypt.hash(user.password, 8)
+    if(user.isModified('password')){
+        user.password = await bcrypt.hash(user.password, 8)
+    }
     next()
 })
 
@@ -102,6 +107,7 @@ userSchema.statics.login = async(email, password)=>{
     // Mencari user berdasarkan email
     let user = await User.findOne({email})
 
+    
     // jika user tidak di temukan
     if(!user){
         throw new Error(`User dengan email ${email} tidak di temukan`)
@@ -115,6 +121,9 @@ userSchema.statics.login = async(email, password)=>{
 
     return user
 }
+
+userSchema.plugin(uniqueValidator, {message: "{PATH} '{VALUE} sudah digunakan"})
+// PATH field yang mengalami duplicate data
 
 const User = mongoose.model('user', userSchema)
 
